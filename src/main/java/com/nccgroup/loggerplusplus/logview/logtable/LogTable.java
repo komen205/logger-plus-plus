@@ -5,27 +5,28 @@ package com.nccgroup.loggerplusplus.logview.logtable;
 //
 
 import com.coreyd97.BurpExtenderUtilities.Preferences;
-import com.nccgroup.loggerplusplus.filter.colorfilter.ColorFilter;
-import com.nccgroup.loggerplusplus.filter.logfilter.LogFilter;
+import com.nccgroup.loggerplusplus.filter.colorfilter.TableColorRule;
+import com.nccgroup.loggerplusplus.filter.logfilter.LogTableFilter;
 import com.nccgroup.loggerplusplus.logentry.LogEntry;
 import com.nccgroup.loggerplusplus.logentry.LogEntryField;
 import com.nccgroup.loggerplusplus.logview.MultipleLogEntryMenu;
 import com.nccgroup.loggerplusplus.logview.SingleLogEntryMenu;
 import com.nccgroup.loggerplusplus.logview.entryviewer.RequestViewerController;
-import com.nccgroup.loggerplusplus.util.userinterface.renderer.BooleanRenderer;
 import com.nccgroup.loggerplusplus.util.Globals;
+import com.nccgroup.loggerplusplus.util.userinterface.renderer.BooleanRenderer;
 
 import javax.swing.*;
 import javax.swing.event.RowSorterEvent;
 import javax.swing.event.TableModelEvent;
-import javax.swing.event.TableModelListener;
 import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableRowSorter;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.util.Collections;
 import java.util.List;
-import java.util.*;
+import java.util.Map;
+import java.util.UUID;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -84,8 +85,8 @@ public class LogTable extends JTable
             }else {
                 // Use a relative instead of an absolute index (This prevents an issue when a filter is set)
                 LogEntry logEntry = getModel().getData().get(convertRowIndexToModel(selectedRow));
-                if (logEntry.requestResponse != null) {
-                    requestViewerController.setDisplayedEntity(logEntry.requestResponse);
+                if (logEntry != null) {
+                    requestViewerController.setDisplayedEntity(logEntry);
                 }
             }
         });
@@ -126,19 +127,19 @@ public class LogTable extends JTable
                 return c;
             }
             if(entry.getMatchingColorFilters().size() != 0){
-                ColorFilter colorFilter = null;
-                Map<UUID, ColorFilter> colorFilters = this.preferences.getSetting(Globals.PREF_COLOR_FILTERS);
+                TableColorRule tableColorRule = null;
+                Map<UUID, TableColorRule> colorFilters = this.preferences.getSetting(Globals.PREF_COLOR_FILTERS);
                 for (UUID uid : entry.getMatchingColorFilters()) {
-                    if(colorFilter == null || colorFilter.getPriority() > colorFilters.get(uid).getPriority()){
-                        colorFilter = colorFilters.get(uid);
+                    if(tableColorRule == null || tableColorRule.getPriority() > colorFilters.get(uid).getPriority()){
+                        tableColorRule = colorFilters.get(uid);
                     }
                 }
-                if (colorFilter == null) {
+                if (tableColorRule == null) {
                     c.setForeground(this.getForeground());
                     c.setBackground(this.getBackground());
                 } else {
-                    c.setForeground(colorFilter.getForegroundColor());
-                    c.setBackground(colorFilter.getBackgroundColor());
+                    c.setForeground(tableColorRule.getForegroundColor());
+                    c.setBackground(tableColorRule.getBackgroundColor());
                 }
             }else{
                 c.setForeground(this.getForeground());
@@ -207,11 +208,11 @@ public class LogTable extends JTable
     }
 
 
-    public LogFilter getCurrentFilter(){
-        return (LogFilter) this.sorter.getRowFilter();
+    public LogTableFilter getCurrentFilter(){
+        return (LogTableFilter) this.sorter.getRowFilter();
     }
 
-    public void setFilter(LogFilter filter){
+    public void setFilter(LogTableFilter filter){
         this.sorter.setRowFilter(filter);
         ((JScrollPane) this.getParent().getParent()).getVerticalScrollBar().setValue(0);
     }

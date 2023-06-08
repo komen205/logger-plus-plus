@@ -12,6 +12,8 @@ public enum LogEntryField {
     NUMBER(FieldGroup.ENTRY, Integer.class, "Item table number. Not valid for filter use.", "Number"),
     PROXY_TOOL(FieldGroup.ENTRY, String.class, "Originating tool name. Extension generated requests will be displayed as \"Extender\".", "Tool"),
     TAGS(FieldGroup.ENTRY, String.class, "The configured tags for which this entry match.", "Tags"),
+
+    INSCOPE(FieldGroup.ENTRY, Boolean.class, "If the URL is in scope", "InScope"),
     LISTENER_INTERFACE(FieldGroup.ENTRY, String.class, "The interface the proxied message was delivered to.", "ListenInterface", "Interface"),
     CLIENT_IP(FieldGroup.ENTRY, String.class, "The requesting client IP address.", "ClientIP", "ClientAddress"),
 
@@ -19,6 +21,7 @@ public enum LogEntryField {
     BASE64_REQUEST(FieldGroup.REQUEST, String.class, "The entire request encoded in Base64", "AsBase64"),
     REQUEST_HEADERS(FieldGroup.REQUEST, String.class, "The request line and associated headers.", "Headers", "Header"),
     REQUEST_BODY(FieldGroup.REQUEST, String.class, "The request body.", "Body"),
+    REQUEST_BODY_LENGTH(FieldGroup.REQUEST, String.class, "The request body's length.", "BodyLength"),
     REQUEST_TIME(FieldGroup.REQUEST, Date.class, "Date and time of inital request (as received by L++).", "Time"),
     REQUEST_LENGTH(FieldGroup.REQUEST, Integer.class, "The length of the received request.", "Length"),
     REQUEST_TOOL(FieldGroup.REQUEST, String.class, "The tool used to initiate the request.", "Tool"), //Alias for proxy.tool,
@@ -28,6 +31,7 @@ public enum LogEntryField {
     METHOD(FieldGroup.REQUEST, String.class, "The request method used.", "Method"),
     PATH(FieldGroup.REQUEST, String.class, "The path component of the requested URL.", "Path"),
     QUERY(FieldGroup.REQUEST, String.class, "The query parameters of the requested URL.", "Query", "GetParams", "QueryParams"),
+    PATHQUERY(FieldGroup.REQUEST, String.class, "The path and query components of the requested URL.", "PathQuery"),
     PROTOCOL(FieldGroup.REQUEST, String.class, "The protocol component of the requested URL.", "Protocol"),
     ISSSL(FieldGroup.REQUEST, Boolean.class, "Did the request use SSL?", "IsSSL", "ssl"),
     USES_COOKIE_JAR(FieldGroup.REQUEST, String.class, "Compares the cookies with the cookie jar to see if any of them are in use.", "UsesCookieJar", "CookieJar"),
@@ -45,11 +49,13 @@ public enum LogEntryField {
     SENTCOOKIES(FieldGroup.REQUEST, Boolean.class, "The value of the cookies header sent to the server.", "CookieString", "SentCookies", "Cookies"),
     PARAMETER_COUNT(FieldGroup.REQUEST, Integer.class, "The number of parameters in the request.", "ParameterCount", "ParamCount"),
     PARAMETERS(FieldGroup.REQUEST, String.class, "The parameters in the request.", "Parameters", "Params"),
+    ORIGIN(FieldGroup.REQUEST, String.class, "The Origin header", "Origin"),
 
     //Response
     BASE64_RESPONSE(FieldGroup.RESPONSE, String.class, "The entire response encoded in Base64", "AsBase64"),
     RESPONSE_HEADERS(FieldGroup.RESPONSE, String.class, "The status line and associated headers.", "Headers", "Header"),
     RESPONSE_BODY(FieldGroup.RESPONSE, String.class, "The response body.", "Body"),
+    RESPONSE_BODY_LENGTH(FieldGroup.RESPONSE, String.class, "The response body's length.", "BodyLength"),
     RESPONSE_HASH(FieldGroup.RESPONSE, String.class, "SHA1 Hash of the response", "hash", "sha1"),
     RESPONSE_TIME(FieldGroup.RESPONSE, Date.class, "Date and time of receiving the response (as received by L++).", "Time"),
     RESPONSE_LENGTH(FieldGroup.RESPONSE, Integer.class, "The length of the received response.", "Length"),

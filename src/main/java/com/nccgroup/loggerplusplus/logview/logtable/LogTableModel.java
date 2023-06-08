@@ -1,6 +1,6 @@
 package com.nccgroup.loggerplusplus.logview.logtable;
 
-import com.nccgroup.loggerplusplus.filter.colorfilter.ColorFilter;
+import com.nccgroup.loggerplusplus.filter.colorfilter.TableColorRule;
 import com.nccgroup.loggerplusplus.filter.colorfilter.ColorFilterListener;
 import com.nccgroup.loggerplusplus.filter.tag.Tag;
 import com.nccgroup.loggerplusplus.filter.tag.TagListener;
@@ -127,26 +127,26 @@ public class LogTableModel extends AbstractTableModel implements ColorFilterList
 
     // FilterListeners
     @Override
-    public void onColorFilterChange(final ColorFilter filter) {
-        createFilterTestingWorker(filter, filter.shouldRetest()).execute();
+    public void onColorFilterChange(final TableColorRule filter) {
+        createFilterTestingWorker(filter, filter.isShouldRetest()).execute();
     }
 
     @Override
-    public void onColorFilterAdd(final ColorFilter filter) {
-        if (!filter.isEnabled() || filter.getFilter() == null)
+    public void onColorFilterAdd(final TableColorRule filter) {
+        if (!filter.isEnabled() || filter.getFilterExpression() == null)
             return;
         createFilterTestingWorker(filter, false);
     }
 
     @Override
-    public void onColorFilterRemove(final ColorFilter filter) {
-        if (!filter.isEnabled() || filter.getFilter() == null)
+    public void onColorFilterRemove(final TableColorRule filter) {
+        if (!filter.isEnabled() || filter.getFilterExpression() == null)
             return;
         new SwingWorker<Void, Integer>() {
             @Override
             protected Void doInBackground() {
                 for (int i = 0; i < entries.size(); i++) {
-                    boolean wasPresent = entries.get(i).matchingColorFilters.remove(filter.getUUID());
+                    boolean wasPresent = entries.get(i).getMatchingColorFilters().remove(filter.getUuid());
                     if (wasPresent) {
                         publish(i);
                     }
@@ -163,7 +163,7 @@ public class LogTableModel extends AbstractTableModel implements ColorFilterList
         }.execute();
     }
 
-    private SwingWorker<Void, Integer> createFilterTestingWorker(final ColorFilter filter, boolean retestExisting) {
+    private SwingWorker<Void, Integer> createFilterTestingWorker(final TableColorRule filter, boolean retestExisting) {
         return new SwingWorker<Void, Integer>() {
 
             @Override
@@ -190,25 +190,25 @@ public class LogTableModel extends AbstractTableModel implements ColorFilterList
     //TagListeners
     @Override
     public void onTagChange(final Tag filter) {
-        createFilterTestingWorker(filter, filter.shouldRetest()).execute();
+        createTagTestingWorker(filter, filter.shouldRetest()).execute();
     }
 
     @Override
     public void onTagAdd(final Tag filter) {
-        if (!filter.isEnabled() || filter.getFilter() == null)
+        if (!filter.isEnabled() || filter.getFilterExpression() == null)
             return;
-        createFilterTestingWorker(filter, false);
+        createTagTestingWorker(filter, false).execute();
     }
 
     @Override
     public void onTagRemove(final Tag filter) {
-        if (!filter.isEnabled() || filter.getFilter() == null)
+        if (!filter.isEnabled() || filter.getFilterExpression() == null)
             return;
         new SwingWorker<Void, Integer>() {
             @Override
             protected Void doInBackground() {
                 for (int i = 0; i < entries.size(); i++) {
-                    boolean wasPresent = entries.get(i).matchingTags.remove(filter);
+                    boolean wasPresent = entries.get(i).getMatchingTags().remove(filter);
                     if (wasPresent) {
                         publish(i);
                     }
@@ -225,7 +225,7 @@ public class LogTableModel extends AbstractTableModel implements ColorFilterList
         }.execute();
     }
 
-    private SwingWorker<Void, Integer> createFilterTestingWorker(final Tag filter, boolean retestExisting) {
+    private SwingWorker<Void, Integer> createTagTestingWorker(final Tag filter, boolean retestExisting) {
         return new SwingWorker<Void, Integer>() {
 
             @Override

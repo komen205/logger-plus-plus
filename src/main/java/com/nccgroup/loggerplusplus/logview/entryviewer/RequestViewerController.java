@@ -1,87 +1,50 @@
 package com.nccgroup.loggerplusplus.logview.entryviewer;
 
-import burp.IHttpRequestResponse;
-import burp.IHttpService;
-import burp.IMessageEditor;
-import burp.IMessageEditorController;
+import burp.api.montoya.ui.editor.EditorOptions;
+import burp.api.montoya.ui.editor.HttpRequestEditor;
+import burp.api.montoya.ui.editor.HttpResponseEditor;
 import com.coreyd97.BurpExtenderUtilities.Preferences;
 import com.nccgroup.loggerplusplus.LoggerPlusPlus;
+import com.nccgroup.loggerplusplus.logentry.LogEntry;
+import lombok.Getter;
 
-public class RequestViewerController implements IMessageEditorController {
+@Getter
+public class RequestViewerController {
 
     private final Preferences preferences;
-    private final IMessageEditor requestEditor;
-    private final IMessageEditor responseEditor;
+    private final HttpRequestEditor requestEditor;
+    private final HttpResponseEditor responseEditor;
     private final RequestViewerPanel requestViewerPanel;
 
-    private IHttpRequestResponse currentItem;
+    private LogEntry currentEntry;
 
-    public RequestViewerController(Preferences preferences, boolean requestEditable, boolean responseEditable) {
+    public RequestViewerController(Preferences preferences) {
         this.preferences = preferences;
-        this.requestEditor = LoggerPlusPlus.callbacks.createMessageEditor(this, requestEditable);
-        this.responseEditor = LoggerPlusPlus.callbacks.createMessageEditor(this, responseEditable);
+        this.requestEditor = LoggerPlusPlus.montoya.userInterface().createHttpRequestEditor(EditorOptions.READ_ONLY);
+        this.responseEditor = LoggerPlusPlus.montoya.userInterface().createHttpResponseEditor(EditorOptions.READ_ONLY);
         this.requestViewerPanel = new RequestViewerPanel(this);
     }
 
-    public IHttpRequestResponse getDisplayedEntity() {
-        return this.currentItem;
-    }
+    public void setDisplayedEntity(LogEntry logEntry) {
+        // Only update message if it's new. This fixes issue #164 and improves performance during heavy scanning.
+        if (this.currentEntry == logEntry) { return; }
 
-    public void setDisplayedEntity(IHttpRequestResponse requestResponse) {
-        if(requestResponse != null && requestResponse.equals(currentItem)) return;
+        this.currentEntry = logEntry;
 
-        this.currentItem = requestResponse;
-        if (requestResponse != null && requestResponse.getRequest() != null) {
-            requestEditor.setMessage(requestResponse.getRequest(), true);
+        if (logEntry == null || logEntry.getRequest() == null) {
+            requestEditor.setRequest(null);
         }else{
-            requestEditor.setMessage(new byte[0], false);
+            requestEditor.setRequest(logEntry.getRequest());
         }
 
-        if (requestResponse != null && requestResponse.getResponse() != null) {
-            responseEditor.setMessage(requestResponse.getResponse(), false);
-        }else {
-            responseEditor.setMessage(new byte[0], false);
+        if (logEntry == null || logEntry.getResponse() == null) {
+            responseEditor.setResponse(null);
+        }else{
+            responseEditor.setResponse(logEntry.getResponse());
         }
     }
 
-    public IMessageEditor getRequestEditor() {
-        return requestEditor;
-    }
+    public void setMarkers(){
 
-    public IMessageEditor getResponseEditor() {
-        return responseEditor;
-    }
-
-    public Preferences getPreferences() {
-        return preferences;
-    }
-
-    public RequestViewerPanel getRequestViewerPanel() {
-        return requestViewerPanel;
-    }
-
-    @Override
-    public byte[] getRequest()
-    {
-        if(currentItem == null || currentItem.getRequest() == null)
-            return new byte[0];
-        else
-            return currentItem.getRequest();
-    }
-
-    @Override
-    public byte[] getResponse()
-    {
-        if(currentItem == null || currentItem.getResponse() == null)
-            return new byte[0];
-        else
-            return currentItem.getResponse();
-    }
-
-    @Override
-    public IHttpService getHttpService()
-    {
-        if(currentItem == null) return null;
-        return currentItem.getHttpService();
     }
 }

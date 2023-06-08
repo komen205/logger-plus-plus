@@ -1,8 +1,11 @@
 package com.nccgroup.loggerplusplus.filter.tag;
 
-import com.nccgroup.loggerplusplus.filter.logfilter.LogFilter;
+import com.nccgroup.loggerplusplus.filter.ColorizingFilterRule;
+import com.nccgroup.loggerplusplus.filter.FilterExpression;
+import com.nccgroup.loggerplusplus.filter.logfilter.LogTableFilter;
 import com.nccgroup.loggerplusplus.filter.parser.ParseException;
 import com.nccgroup.loggerplusplus.filterlibrary.FilterLibraryController;
+import lombok.Getter;
 
 import java.awt.*;
 import java.util.UUID;
@@ -10,128 +13,51 @@ import java.util.UUID;
 /**
  * Created by corey on 19/07/17.
  */
-public class Tag implements Comparable<Tag> {
-    private UUID uid;
-    private String name;
-    private LogFilter filter;
-    private String filterString;
-    private Color backgroundColor;
-    private Color foregroundColor;
-    private boolean enabled;
-    private boolean modified;
-    private boolean shouldRetest;
-    private short priority;
+public class Tag extends ColorizingFilterRule implements Comparable<Tag> {
 
-    public Tag() {
-        this.uid = UUID.randomUUID();
-        this.enabled = true;
-        this.shouldRetest = true;
+    @Getter
+    private boolean shouldRetest = true;
+
+    public Tag(){
+        super("", "");
     }
 
-    public Tag(String title, LogFilter filter) {
-        this();
-        this.name = title;
-        this.setFilter(filter);
+    public Tag(String title, String filterString) {
+        super(title, filterString);
     }
 
-    public Tag(FilterLibraryController filterLibraryController, String title, String filterString) throws ParseException {
-        this(title, new LogFilter(filterLibraryController, filterString));
+    public Tag(String title, FilterExpression filterExpression) {
+        super(title, filterExpression);
     }
 
-    public Tag(String title, LogFilter filter, Color foreground, Color background) {
-        this(title, filter);
-        this.foregroundColor = foreground;
-        this.backgroundColor = background;
+    @Override
+    public boolean trySetFilter(String filterString){
+        boolean success = super.trySetFilter(filterString);
+        if(success) shouldRetest = true;
+        return success;
     }
 
-    public UUID getUUID() {
-        return uid;
-    }
-
-    public void setBackgroundColor(Color backgroundColor) {
-        this.backgroundColor = backgroundColor;
-        this.modified = true;
-    }
-
-    public Color getBackgroundColor() {
-        return backgroundColor;
-    }
-
-    public Color getForegroundColor() {
-        return foregroundColor;
-    }
-
-    public void setForegroundColor(Color foregroundColor) {
-        this.foregroundColor = foregroundColor;
-        modified = true;
-    }
-
-    public LogFilter getFilter() {
-        return filter;
-    }
-
-    public void setFilter(LogFilter filter) {
-        this.filter = filter;
-        if (filter != null)
-            this.filterString = filter.toString();
-        modified = true;
+    @Override
+    public void setFilter(FilterExpression filter) {
+        super.setFilter(filter);
         shouldRetest = true;
     }
 
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public boolean isEnabled() {
-        return enabled;
-    }
-
+    @Override
     public void setEnabled(boolean enabled) {
-        this.enabled = enabled;
-        modified = true;
+        super.setEnabled(enabled);
         shouldRetest = true;
     }
 
-    public String getFilterString() {
-        return filterString;
-    }
-
-    public void setFilterString(String filterString) {
-        this.filterString = filterString;
-    }
-
-    public boolean equals(Object obj) {
-        if (obj instanceof Tag) {
-            return ((Tag) obj).getUUID().equals(this.uid);
-        } else {
-            return super.equals(obj);
-        }
-    }
-
-    public boolean isModified() {
-        return modified;
-    }
-
-    public void setModified(boolean modified) {
-        this.modified = modified;
-    }
-
+    @Override
     public void setPriority(short priority) {
-        this.priority = priority;
-        this.modified = true;
-    }
-
-    public short getPriority() {
-        return priority;
+        super.setPriority(priority);
+        shouldRetest = true;
     }
 
     @Override
     public int compareTo(Tag tag) {
-        return ((Comparable) this.priority).compareTo(tag.getPriority());
+        return ((Comparable) this.getPriority()).compareTo(tag.getPriority());
     }
 
     public boolean shouldRetest() {
@@ -140,6 +66,6 @@ public class Tag implements Comparable<Tag> {
 
     @Override
     public String toString() {
-        return "ColorFilter[" + (this.filter != null ? this.filter.toString() : "") + "]";
+        return this.getName();
     }
 }
