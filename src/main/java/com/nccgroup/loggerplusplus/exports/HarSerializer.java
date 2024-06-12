@@ -51,7 +51,7 @@ public class HarSerializer extends TypeAdapter<List<LogEntry>> {
             // Individual entry object
             writer.beginObject();
 
-            final String pattern = "yyyy-MM-dd'T'HH:mm:ss.SSSZ";
+            final String pattern = "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'";
             SimpleDateFormat simpleDateFormat = new SimpleDateFormat(pattern);
             writer.name("startedDateTime").value(simpleDateFormat.format(logEntry.getRequestDateTime()));
 
